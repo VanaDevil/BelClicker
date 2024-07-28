@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Беличья Лихорадка - Кликер</title>
     <style>
-    body {
+body {
     background-color: #f0f0f0;
     font-family: 'Arial', sans-serif;
     display: flex;
@@ -79,7 +79,7 @@
 }
 
 .modal {
-    display: none; /* Скрываем модальное окно по умолчанию */
+    /* Скрываем модальное окно по умолчанию */
     position: fixed; /* Фиксируем позицию */
     left: 0;
     top: 0;
@@ -479,6 +479,12 @@
         const skinPreviews = document.querySelectorAll('.skin-preview');
         const achievements = document.querySelectorAll('.achievement');
 
+        // Устанавливаем стандартный скин
+        coin.src = 'coin.png'; // Добавлено
+
+        // Закрываем магазин по умолчанию
+        storeModal.style.display = 'none';
+
         // Обновляем отображение BelCoin
         function updateBelcoinDisplay() {
             belcoinDisplay.textContent = belcoin + " Орешков";
@@ -604,7 +610,7 @@
                     activeSkin = this;
 
                     // Заменяем изображение монет
-                    coin.src = `images/skins/${skinId}.JPEG`;
+                    coin.src = `images/skins/${skinId}.JPEG`; // Исправлено: skinId добавлен
 
                     // Убираем информацию о скине
                     this.querySelector('.skin-preview-info').remove();
