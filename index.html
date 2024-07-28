@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Беличья Лихорадка - Кликер</title>
+    <style>
+    body {
+    background-color: #f0f0f0;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    position: relative; /* Для позиционирования достижений */
+    overflow: hidden; /* Скрываем полосы прокрутки */
+}
+
+.container {
+    text-align: center;
+    width: 100%;
+    max-width: 600px; /* Максимальная ширина */
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#coin {
+    width: 150px; /* Монетка больше */
+    height: 150px;
+    cursor: pointer;
+    animation: shake 0.1s linear infinite;
+    position: relative;
+}
+
+#coin::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: -1;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes shake {
+    0% { transform: translateX(-2px); }
+    50% { transform: translateX(2px); }
+    100% { transform: translateX(-2px); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+#belcoin {
+    font-size: 30px;
+    margin-top: 10px;
+}
+
+.store-button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Тень */
+}
+
+.modal {
+    display: none; /* Скрываем модальное окно по умолчанию */
+    position: fixed; /* Фиксируем позицию */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 90%;
+    max-width: 500px; /* Максимальная ширина */
+    position: relative; /* Для позиционирования крестика */
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #007bff;
+}
+
+.store-tabs {
+    display: flex;
+    margin-top: 20px;
+}
+
+.tab {
+    padding: 10px 15px;
+    background-color: #eee;
+    border-radius: 5px 5px 0 0;
+    cursor: pointer;
+    flex: 1; /* Равномерное распределение */
+}
+
+.tab.active {
+    background-color: #ddd;
+}
+
+.store-content {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.upgrade {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f5f5f5;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.upgrade-name {
+    font-weight: bold;
+}
+
+.upgrade-level {
+    font-size: 14px;
+}
+
+.upgrade-price {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.achievements {
+    position: absolute; /* Позиционирование достижений */
+    top: 20px;
+    right: 20px;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+.achievement {
+    margin-bottom: 10px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    display: none; /* Скрываем по умолчанию */
+}
+
+.achievement.completed {
+    display: none; /* Скрываем выполненные */
+}
+
+.achievement-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.achievement-progress {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 15px;
+    background-color: #ddd;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.achievement-progress-bar {
+    height: 100%;
+    background-color: #007bff;
+    border-radius: 5px;
+    width: 0%; /* Ширина по умолчанию */
+}
+
+.achievement-progress-text {
+    margin-left: 5px;
+    font-size: 12px;
+    color: #555; /* Серый цвет текста */
+}
+
+.achievement-reward {
+    font-size: 12px;
+    color: #007bff;
+    font-weight: bold; /* Жирный шрифт */
+}
+
+.skin-preview {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    background-size: cover;
+    position: relative;
+    margin-right: 10px;
+    border: 2px solid #ddd; /* Рамка по умолчанию */
+}
+
+.skin-preview.active {
+    border: 2px solid #007bff; /* Синяя рамка при активном скине */
+}
+
+.skin-preview-info {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    width: calc(100% - 10px);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+.skin-preview-info span {
+    display: block;
+    text-align: center;
+}
+
+/* Стили для скроллинга скинов */
+.skin-container {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap; /* Запрещаем перенос строк */
+}
+
+/* Анимация клика */
+@keyframes clickAnimation {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.modal-overlay {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+}
+
+.store-button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Тень */
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Беличья Лихорадка</h1>
+        <img id="coin" src="coin.png" alt="Орех">
+        <div id="belcoin">0 Орешков</div>
+
+        <button class="store-button" id="openStore">Открыть магазин</button>
+
+        <div class="achievements">
+            <h2>Достижения</h2>
+            <div class="achievement" data-achievement-id="achievement1">
+                <div class="achievement-title">Первый Орех</div>
+                <div class="achievement-progress">
+                    <div class="achievement-progress-bar" style="width: 0%;"></div>
+                    <div class="achievement-progress-text">0/10 Орешков</div>
+                </div>
+                <div class="achievement-reward">Награда: +5 Орешков</div>
+            </div>
+            <div class="achievement" data-achievement-id="achievement2">
+                <div class="achievement-title">Грызун-профи</div>
+                <div class="achievement-progress">
+                    <div class="achievement-progress-bar" style="width: 0%;"></div>
+                    <div class="achievement-progress-text">0/100 Клика</div>
+                </div>
+                <div class="achievement-reward">Награда: +10 Орешков</div>
+            </div>
+            <div class="achievement" data-achievement-id="achievement3">
+                <div class="achievement-title">Ореховый Магнат</div>
+                <div class="achievement-progress">
+                    <div class="achievement-progress-bar" style="width: 0%;"></div>
+                    <div class="achievement-progress-text">0/500 Орешков</div>
+                </div>
+                <div class="achievement-reward">Награда: +20 Орешков</div>
+            </div>
+            <div class="achievement" data-achievement-id="achievement4">
+                <div class="achievement-title">Ореховый Король</div>
+                <div class="achievement-progress">
+                    <div class="achievement-progress-bar" style="width: 0%;"></div>
+                    <div class="achievement-progress-text">0/1000 Орешков</div>
+                </div>
+                <div class="achievement-reward">Награда: +50 Орешков</div>
+            </div>
+            <div class="achievement" data-achievement-id="achievement5">
+                <div class="achievement-title">Ореховый Бог</div>
+                <div class="achievement-progress">
+                    <div class="achievement-progress-bar" style="width: 0%;"></div>
+                    <div class="achievement-progress-text">0/5000 Орешков</div>
+                </div>
+                <div class="achievement-reward">Награда: +100 Орешков</div>
+            </div>
+        </div>
+
+        <div class="modal" id="storeModal">
+            <div class="modal-overlay" id="closeModal"></div>
+            <div class="modal-content">
+                <span class="modal-close" id="closeCross">×</span>
+                <h2>Магазин</h2>
+                <div class="store-tabs">
+                    <div class="tab active" data-tab="upgrades">Улучшения</div>
+                    <div class="tab" data-tab="skins">Скины</div>
+                </div>
+
+                <div class="store-content" id="store-content">
+                    <div class="store-section" id="upgrades-section">
+                        <h2>Улучшения</h2>
+                        <div class="upgrade" data-upgrade-id="upgrade1">
+                            <div>
+                                <div class="upgrade-name">Острые Зубки</div>
+                                <div class="upgrade-level">Уровень: 0</div>
+                            </div>
+                            <div class="upgrade-price">10 Орешков</div>
+                        </div>
+                        <div class="upgrade" data-upgrade-id="upgrade2">
+                            <div>
+                                <div class="upgrade-name">Быстрые Лапки</div>
+                                <div class="upgrade-level">Уровень: 0</div>
+                            </div>
+                            <div class="upgrade-price">50 Орешков</div>
+                        </div>
+                        <div class="upgrade" data-upgrade-id="upgrade3">
+                            <div>
+                                <div class="upgrade-name">Ореховый Склад</div>
+                                <div class="upgrade-level">Уровень: 0</div>
+                            </div>
+                            <div class="upgrade-price">200 Орешков</div>
+                        </div>
+                        <div class="upgrade" data-upgrade-id="upgrade4">
+                            <div>
+                                <div class="upgrade-name">Супер-Грызун</div>
+                                <div class="upgrade-level">Уровень: 0</div>
+                            </div>
+                            <div class="upgrade-price">500 Орешков</div>
+                        </div>
+                        <div class="upgrade" data-upgrade-id="upgrade5">
+                            <div>
+                                <div class="upgrade-name">Ореховая Ферма</div>
+                                <div class="upgrade-level">Уровень: 0</div>
+                            </div>
+                            <div class="upgrade-price">1000 Орешков</div>
+                        </div>
+                    </div>
+                    <div class="store-section" id="skins-section" style="display: none;">
+                        <h2>Скины</h2>
+                        <div class="skin-container">
+                            <div class="skin-preview" data-skin-id="skin1" style="background-image: url('images/skins/galaxy.JPEG');">
+                                <div class="skin-preview-info">
+                                    <span>Космическая Белка</span>
+                                    <br>
+                                    <span>Грызун из далёких галактик.</span>
+                                    <br>
+                                    <span>Цена: 100 Орешков</span>
+                                </div>
+                            </div>
+                            <div class="skin-preview" data-skin-id="skin2" style="background-image: url('images/skins/gold.JPEG');">
+                                <div class="skin-preview-info">
+                                    <span>Золотая Белка</span>
+                                    <br>
+                                    <span>Блестящая, как золото.</span>
+                                    <br>
+                                    <span>Цена: 200 Орешков</span>
+                                </div>
+                            </div>
+                            <div class="skin-preview" data-skin-id="skin3" style="background-image: url('images/skins/google.JPEG');">
+                                <div class="skin-preview-info">
+                                    <span>Белка-Гугл</span>
+                                    <br>
+                                    <span>Знает всё!</span>
+                                    <br>
+                                    <span>Цена: 300 Орешков</span>
+                                </div>
+                            </div>
+                            <div class="skin-preview" data-skin-id="skin4" style="background-image: url('images/skins/a ice.JPEG');">
+                                <div class="skin-preview-info">
+                                    <span>Ледяная Белка</span>
+                                    <br>
+                                    <span>Холодная и быстрая.</span>
+                                    <br>
+                                    <span>Цена: 400 Орешков</span>
+                                </div>
+                            </div>
+                            <div class="skin-preview" data-skin-id="skin5" style="background-image: url('images/skins/a lava.JPEG');">
+                                <div class="skin-preview-info">
+                                    <span>Лавовая Белка</span>
+                                    <br>
+                                    <span>Горячая, как огонь.</span>
+                                    <br>
+                                    <span>Цена: 500 Орешков</span>
+                                </div>
+                            </div>
+                            <div class="skin-preview" data-skin-id="skin6" style="background-image: url('images/skins/leaf.JPEG');">
+                                <div class="skin-preview-info">
+                                    <span>Листовая Белка</span>
+                                    <br>
+                                    <span>Зелёная и милая.</span>
+                                    <br>
+                                    <span>Цена: 600 Орешков</span>
+                                </div>
+                            </div>
+                            <div class="skin-preview" data-skin-id="skin7" style="background-image: url('images/skins/water.JPEG');">
+                                <div class="skin-preview-info">
+                                    <span>Водная Белка</span>
+                                    <br>
+                                    <span>Быстро плавает.</span>
+                                    <br>
+                                    <span>Цена: 700 Орешков</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Переменные для игры
+        let belcoin = 0;
+        let clicksPerSecond = 0;
+        let clicksCount = 0;
+        let activeSkin = null; // Отслеживание активного скина
+
+        // Получаем элементы DOM
+        const coin = document.getElementById('coin');
+        const belcoinDisplay = document.getElementById('belcoin');
+        const storeButton = document.getElementById('openStore');
+        const storeModal = document.getElementById('storeModal');
+        const closeModalButton = document.getElementById('closeModal');
+        const closeCross = document.getElementById('closeCross');
+        const storeTabs = document.querySelectorAll('.tab');
+        const storeContent = document.getElementById('store-content');
+        const upgradesSection = document.getElementById('upgrades-section');
+        const skinsSection = document.getElementById('skins-section');
+        const upgrades = document.querySelectorAll('.upgrade');
+        const skinPreviews = document.querySelectorAll('.skin-preview');
+        const achievements = document.querySelectorAll('.achievement');
+
+        // Обновляем отображение BelCoin
+        function updateBelcoinDisplay() {
+            belcoinDisplay.textContent = belcoin + " Орешков";
+        }
+
+        // Обработчик клика на монетку
+        coin.addEventListener('click', function() {
+            belcoin++;
+            clicksCount++;
+            updateBelcoinDisplay();
+            coin.style.animation = 'clickAnimation 0.1s ease-in-out'; // Анимация клика
+            setTimeout(() => {
+                coin.style.animation = '';
+            }, 100); // Сброс анимации
+
+            // Обновление прогресса достижений
+            updateAchievementProgress();
+        });
+
+        // Открытие модального окна
+        storeButton.addEventListener('click', function() {
+            storeModal.style.display = 'flex';
+        });
+
+        // Закрытие модального окна
+        closeModalButton.addEventListener('click', function() {
+            storeModal.style.display = 'none';
+        });
+
+        // Закрытие модального окна по клику на фон
+        document.addEventListener('click', function(event) {
+            if (event.target === storeModal) {
+                storeModal.style.display = 'none';
+            }
+        });
+
+        // Закрытие модального окна по крестику
+        closeCross.addEventListener('click', function() {
+            storeModal.style.display = 'none';
+        });
+
+        // Обработчик клика на вкладку в магазине
+        storeTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const activeTab = document.querySelector('.tab.active');
+                activeTab.classList.remove('active');
+                this.classList.add('active');
+
+                const tabContentId = this.dataset.tab;
+                const tabContent = document.getElementById(`${tabContentId}-section`);
+
+                storeContent.querySelectorAll('.store-section').forEach(section => {
+                    section.style.display = 'none';
+                });
+
+                tabContent.style.display = 'block';
+            });
+        });
+
+        // Обработчик клика на улучшение
+        upgrades.forEach(upgrade => {
+            upgrade.addEventListener('click', function() {
+                const upgradeId = this.dataset.upgradeId;
+                const upgradeLevelElement = this.querySelector('.upgrade-level');
+                const upgradePriceElement = this.querySelector('.upgrade-price');
+                const currentLevel = parseInt(upgradeLevelElement.textContent.split(': ')[1]);
+                const price = parseInt(upgradePriceElement.textContent.split(' ')[0]);
+
+                // Проверка достаточности BelCoin
+                if (belcoin >= price) {
+                    belcoin -= price;
+                    updateBelcoinDisplay();
+
+                    // Увеличиваем уровень улучшения
+                    const newLevel = currentLevel + 1;
+                    upgradeLevelElement.textContent = `Уровень: ${newLevel}`;
+
+                    // Увеличиваем цену
+                    const newPrice = price * 2;
+                    upgradePriceElement.textContent = `${newPrice} Орешков`;
+
+                    // Обновляем скорость клика (пример)
+                    if (upgradeId === 'upgrade1') {
+                        clicksPerSecond += 0.1;
+                    } else if (upgradeId === 'upgrade2') {
+                        clicksPerSecond += 0.5;
+                    } else if (upgradeId === 'upgrade3') {
+                        // Ореховый склад увеличивает скорость накопления
+                        clicksPerSecond *= 1.2;
+                    } else if (upgradeId === 'upgrade4') {
+                        // Супер-Грызун значительно увеличивает скорость клика
+                        clicksPerSecond *= 2;
+                    } else if (upgradeId === 'upgrade5') {
+                        // Ореховая ферма постоянно приносит орехи
+                        setInterval(() => {
+                            belcoin += 10;
+                            updateBelcoinDisplay();
+                        }, 1000);
+                    }
+                } else {
+                    // Сообщение о недостаточности BelCoin
+                    alert('Недостаточно Орешков!');
+                }
+            });
+        });
+
+        // Обработчик клика на скин
+        skinPreviews.forEach(skinPreview => {
+            skinPreview.addEventListener('click', function() {
+                const skinId = this.dataset.skinId;
+                const skinPrice = parseInt(this.querySelector('.skin-preview-info span:last-child').textContent.split(': ')[1]);
+
+                // Проверка достаточности BelCoin
+                if (belcoin >= skinPrice) {
+                    belcoin -= skinPrice;
+                    updateBelcoinDisplay();
+
+                    // Применение скина (меняем изображение монет)
+                    if (activeSkin) {
+                        activeSkin.classList.remove('active');
+                    }
+                    this.classList.add('active');
+                    activeSkin = this;
+
+                    // Заменяем изображение монет
+                    coin.src = `images/skins/${skinId}.JPEG`;
+
+                    // Убираем информацию о скине
+                    this.querySelector('.skin-preview-info').remove();
+                } else {
+                    // Сообщение о недостаточности BelCoin
+                    alert('Недостаточно Орешков!');
+                }
+            });
+        });
+
+        // Обновление прогресса достижения
+        function updateAchievementProgress() {
+            achievements.forEach(achievement => {
+                const achievementId = achievement.dataset.achievementId;
+                const progressTextElement = achievement.querySelector('.achievement-progress-text');
+                const progressBarElement = achievement.querySelector('.achievement-progress-bar');
+                let progress = 0;
+                let target = 0;
+                let reward = 0;
+
+                if (achievementId === 'achievement1') {
+                    target = 10;
+                    reward = 5;
+                    progress = belcoin;
+                } else if (achievementId === 'achievement2') {
+                    target = 100;
+                    reward = 10;
+                    progress = clicksCount;
+                } else if (achievementId === 'achievement3') {
+                    target = 500;
+                    reward = 20;
+                    progress = belcoin;
+                } else if (achievementId === 'achievement4') {
+                    target = 1000;
+                    reward = 50;
+                    progress = belcoin;
+                } else if (achievementId === 'achievement5') {
+                    target = 5000;
+                    reward = 100;
+                    progress = belcoin;
+                }
+
+                progressTextElement.textContent = `${progress}/${target}`;
+                progressBarElement.style.width = (progress / target) * 100 + '%';
+
+                // Проверка достижения цели
+                if (progress >= target) {
+                    // Выдача награды (пример)
+                    belcoin += reward;
+                    updateBelcoinDisplay();
+
+                    // Отметка достижения как выполненного
+                    achievement.classList.add('completed');
+                    achievement.style.display = 'none';
+
+                    // Появление нового достижения (если есть)
+                    const nextAchievement = achievement.nextElementSibling;
+                    if (nextAchievement) {
+                        nextAchievement.style.display = 'block';
+                    }
+                }
+            });
+        }
+
+        // Цикл для автоматического клика (добавить позже)
+        setInterval(() => {
+            belcoin += clicksPerSecond;
+            updateBelcoinDisplay();
+        }, 1000);
+    </script>
+</body>
+</html>
